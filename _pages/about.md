@@ -6,7 +6,7 @@ subtitle: <a href='#'>Affiliations</a>. Address. Contacts. Motto. Etc.
 
 profile:
   align: right
-  image: prof_pic.jpg
+  image: ProfilePic.jpg
   image_circular: false # crops the image to make it circular
   more_info: >
     <p>Fairfax, VA, 22032</p>
@@ -16,7 +16,7 @@ selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-Hi! I am a PhD student at X University, advised by Professor X. My research focuses on off-road navigation in robotics. I design, build, and deploy robots tailored for challenging off-road scenarios.
+Hi! I am a PhD student at X University, advised by Professor X. My research focuses on off-road navigation in robotics. I design, build, and deploy robots tailored for challenging off-road environments.
 
 My work integrates principles from physics, control systems, and planning algorithms to develop robust solutions for off-road robotics. By combining these disciplines, I aim to push the boundaries of what robots can achieve in complex and unpredictable terrains.
 
