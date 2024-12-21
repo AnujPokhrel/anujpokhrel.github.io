@@ -205,6 +205,7 @@ DEPENDENCIES
   jekyll-toc
   jekyll-twitter-plugin
   jemoji
+  kramdown-parser-gfm
   unicode_utils
   webrick
 

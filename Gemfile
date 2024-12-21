@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 group :jekyll_plugins do
     gem 'classifier-reborn'
-    gem 'jekyll'
+    gem 'jekyll' 
     gem 'jekyll-archives'
     gem 'jekyll-email-protect'
     gem 'jekyll-feed'
@@ -20,6 +20,7 @@ group :jekyll_plugins do
     gem 'jemoji'
     gem 'unicode_utils'
     gem 'webrick'
+    gem 'kramdown-parser-gfm'
 end
 group :other_plugins do
     gem 'css_parser'
