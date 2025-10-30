@@ -1,0 +1,231 @@
+<!doctype html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>🎃 Costume Contest Voting</title>
+    <style>
+        :root { --bg:#0b0b0f; --card:#141420; --ink:#e6e6f2; --muted:#9aa0b4; --accent:#ff7a18; }
+        *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto; background:var(--bg); color:var(--ink)}
+        header{padding:24px;text-align:center}
+        h1{margin:0 0 6px;font-size:28px}
+        .wrap{max-width:880px;margin:0 auto;padding:16px}
+        .card{background:var(--card); border:1px solid #23233a; border-radius:16px; padding:16px; box-shadow:0 1px 12px rgba(0,0,0,.25); margin:12px 0}
+        label{display:block;margin:8px 0 4px;color:var(--muted)}
+        input,select,button,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #2b2b44;background:#0e0e18;color:var(--ink)}
+        button{cursor:pointer;background:var(--accent);border:none;color:#1b0b00;font-weight:700}
+        .grid{display:grid; gap:12px}
+        .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+        .contestant{display:flex;gap:10px;align-items:center;padding:8px;border:1px solid #2a2a40;border-radius:12px}
+        .contestant img{width:52px;height:52px;object-fit:cover;border-radius:10px;border:1px solid #333}
+        .muted{color:var(--muted);font-size:14px}
+        .ok{color:#5ee38a}
+        .err{color:#ff6363}
+        details{border:1px dashed #333;border-radius:12px;padding:10px}
+        summary{cursor:pointer}
+        .row{display:flex;gap:8px}
+        .row > *{flex:1}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🎃 Halloween Costume Contest</h1>
+        <div class="muted">Register your costume, grab a ballot code, then cast your <b>Top 3</b> picks. Votes are anonymous.</div>
+    </header>
+    <div class="wrap">
+        <div class="card" id="status"></div>
+
+
+    <div class="card">
+        <h2>1) Register a Contestant</h2>
+        <div class="grid">
+            <div class="row">
+                <div>
+                    <label>Name</label>
+                    <input id="r_name" placeholder="e.g., Anuj" />
+                </div>
+                <div>
+                    <label>Costume</label>
+                    <input id="r_costume" placeholder="e.g., Vampire Hunter" />
+                </div>
+            </div>
+            <div>
+                <label>Photo URL (optional)</label>
+                <input id="r_photo" placeholder="https://…" />
+            </div>
+            <button id="btnRegister">Register Contestant</button>
+        </div>
+            <p class="muted">Note: Anyone can register; only admin can mint ballot codes.</p>
+        </div>
+    </div>
+
+
+    <div class="card">
+        <h2>2) Get a Ballot Code (Host)</h2>
+        <div class="grid">
+            <div class="row">
+                <div>
+                    <label>Admin Key</label>
+                    <input id="a_key" placeholder="Host-only" />
+                </div>
+                <div>
+                    <label>Issue To (optional)</label>
+                    <input id="a_to" placeholder="e.g., Door #1" />
+                </div>
+            </div>
+            <button id="btnBallot">Generate Ballot Code</button>
+            <div class="muted">Hand this code to a guest. Each code works <b>once</b>.</div>
+            <pre id="ballotOut" style="white-space:pre-wrap"></pre>
+        </div>
+    </div>
+
+
+    <div class="card">
+        <h2>3) Vote Your Top 3</h2>
+        <div class="grid">
+            <label>Ballot Code</label>
+            <input id="v_code" placeholder="6‑char code" />
+            <div class="grid cols-3">
+                <div>
+                    <label>1st (3 pts)</label>
+                    <select id="v_first"></select>
+                </div>
+                <div>
+                    <label>2nd (2 pts)</label>
+                    <select id="v_second"></select>
+                </div>
+                <div>
+                    <label>3rd (1 pt)</label>
+                    <select id="v_third"></select>
+                </div>
+            </div>
+            <button id="btnVote">Submit Vote</button>
+        </div>
+    </div>
+
+
+    <details class="card">
+        <summary><b>Host: View Results</b></summary>
+        <div class="grid">
+            <label>Admin Key</label>
+            <input id="r_key" placeholder="Host-only" />
+            <button id="btnResults">Refresh Leaderboard</button>
+            <div id="results"></div>
+        </div>
+    </details>
+
+
+    <div class="card">
+        <h3>Current Contestants</h3>
+        <div id="list"></div>
+    </div>
+</div>
+<script>
+    // const API_BASE="https://script.google.com/macros/s/AKfycbztfw7FyogMmsL1lzfs5VvCLRjbmmjGy1i10P8SAoF0xywSFHzzO7uj5GvpuWuRDxBh/exec"
+    const API_BASE="https://halloween-voter.mailforpokhrel.workers.dev" 
+    // Helpers
+    const $ = sel => document.querySelector(sel);
+    function msg(txt, cls='') { $('#status').innerHTML = `<span class="${cls}">${txt}</span>`; }
+    async function apiGet(action, params={}) {
+        const url = new URL(API_BASE);
+        url.searchParams.set('action', action);
+        Object.entries(params).forEach(([k,v])=> url.searchParams.set(k,v));
+        const res = await fetch(url.toString());
+        return res.json();
+    }
+    // async function apiPost(action, body={}) {
+    //     const url = `${API_BASE}?action=${encodeURIComponent(action)}`;
+    //     const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    //     return res.json();
+    // }
+
+    async function apiPost(action, body={}) {
+        // Send as form-encoded to avoid CORS preflight (no custom headers)
+        const url = `${API_BASE}?action=${encodeURIComponent(action)}`;
+        const form = new URLSearchParams();
+        Object.entries(body).forEach(([k,v]) => form.append(k, v));
+        const res = await fetch(url, { method:'POST', body: form });
+        return res.json();
+    }
+
+
+    // ======= UI FILLERS =======
+    async function loadContestants() {
+        const r = await apiGet('list_contestants');
+        if (!r.ok) return msg(r.error, 'err');
+        const arr = r.data || [];
+        // Fill selects
+        const opts = ['<option value="">-- choose --</option>'].concat(arr.map(c=>`<option value="${c.id}">${c.displayName} — ${c.costume||''}</option>`));
+        ['#v_first','#v_second','#v_third'].forEach(sel => $(sel).innerHTML = opts.join(''));
+        // Render list
+        $('#list').innerHTML = arr.map(c => `
+            <div class="contestant">
+                <img src="${c.photoUrl||'https://placehold.co/80x80?text=🎃'}" alt="photo" />
+                <div>
+                    <div><b>${c.displayName}</b> <span class="muted">${c.costume||''}</span></div>
+                    <div class="muted">ID: ${c.id}</div>
+                </div>
+            </div>
+        `).join('') || '<div class="muted">No contestants yet.</div>';
+    }
+
+    // Prevent duplicate picks
+    function validatePicks() {
+        const a = $('#v_first').value, b = $('#v_second').value, c = $('#v_third').value;
+        const set = new Set([a,b,c].filter(Boolean));
+        if ([a,b,c].some(x=>!x) || set.size !== 3) return false;
+        return true;
+    }
+
+    // ======= EVENTS =======
+    $('#btnRegister').addEventListener('click', async ()=>{
+        const displayName = $('#r_name').value.trim();
+        const costume = $('#r_costume').value.trim();
+        const photoUrl = $('#r_photo').value.trim();
+        if (!displayName) return msg('Please enter a name', 'err');
+        const r = await apiPost('register_contestant', { displayName, costume, photoUrl });
+        if (r.ok) { msg('Registered! ID: '+r.data.id, 'ok'); $('#r_name').value=''; $('#r_costume').value=''; $('#r_photo').value=''; loadContestants(); }
+        else msg(r.error, 'err');
+    });
+
+
+    $('#btnBallot').addEventListener('click', async ()=>{
+        const key = $('#a_key').value.trim();
+        const issuedTo = $('#a_to').value.trim();
+        if (!key) return msg('Admin key required to mint ballot codes','err');
+        const r = await apiPost('generate_ballot', { key, issuedTo });
+        if (r.ok) { $('#ballotOut').textContent = `Ballot Code: ${r.data.code}`; msg('Ballot generated.', 'ok'); }
+        else msg(r.error, 'err');
+    });
+
+
+    $('#btnVote').addEventListener('click', async ()=>{
+        const code = $('#v_code').value.trim().toUpperCase();
+        if (!validatePicks()) return msg('Choose three different contestants.', 'err');
+        const body = { code, first: $('#v_first').value, second: $('#v_second').value, third: $('#v_third').value };
+        const r = await apiPost('submit_vote', body);
+        if (r.ok) { msg('Vote submitted! Thank you 🎉','ok'); $('#v_code').value=''; ['#v_first','#v_second','#v_third'].forEach(s=>$(s).selectedIndex=0); }
+        else msg(r.error, 'err');
+    });
+
+
+    $('#btnResults').addEventListener('click', async ()=>{
+        const key = $('#r_key').value.trim();
+        const r = await apiGet('results', { key });
+        if (!r.ok) return msg(r.error, 'err');
+        const { totalVotes, leaderboard } = r.data;
+        const rows = (leaderboard||[]).map((x,i)=>`<tr><td>${i+1}</td><td>${x.name}</td><td>${x.points}</td><td>${x.firsts}</td><td>${x.seconds}</td><td>${x.thirds}</td></tr>`).join('');
+        $('#results').innerHTML = `
+            <div class="muted">Total ballots: <b>${totalVotes}</b></div>
+            <table style="width:100%;border-collapse:collapse;margin-top:8px">
+                <thead><tr><th>#</th><th>Name</th><th>Pts</th><th>1st</th><th>2nd</th><th>3rd</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+        msg('Results loaded', 'ok');
+    });
+
+
+    // Initial load
+    loadContestants();
+</script>
+</body>
+</html>
