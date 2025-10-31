@@ -53,259 +53,292 @@
     <div class="wrap">
         <div class="card" id="status"></div>
 
+        <div class="card">
+                <h2>1) Register a Contestant</h2>
+                <div style="padding:10px; border:2px solid var(--accent); border-radius:8px; margin-bottom:12px; font-weight:700; color:var(--accent);">
+                    ⚠️ Important: Remember your Name, Costume, Secret Number, and Favorite Animal for voting!
+                </div>
+                <div class="grid">
+                <div class="row">
+                        <div>
+                            <label>Name</label>
+                            <input id="r_name" placeholder="e.g., Anuj" />
+                        </div>
+                        <div>
+                            <label>Costume</label>
+                            <input id="r_costume" placeholder="e.g., Vampire Hunter" />
+                        </div>
+                        <div>
+                            <label>Secret Number</label>
+                            <input id="r_fav_num" placeholder="e.g., 25" type="text" pattern="\d{1,2}" maxlength="2" />
+                        </div>
+                        <div>
+                            <label>Favorite Animal</label>
+                            <input id="r_fav_animal" placeholder="e.g., Dragon" />
+                        </div>
+                    </div> 
+                    <!-- <div>
+                        <label>Photo URL (optional)</label>
+                        <input id="r_photo" placeholder="https://…" />
+                    </div> -->
+                    <div id="reg-status" style="margin-top: 10px;"></div>
+                    <button id="btnRegister">Register Contestant</button>
+                <!-- </div> -->
+                    <!-- <p class="muted">Note: Anyone can register; only admin can mint ballot codes.</p> -->
+                <!-- </div> -->
+        </div> 
 
-   <div class="card">
-        <h2>1) Register a Contestant</h2>
-        <div style="padding:10px; border:2px solid var(--accent); border-radius:8px; margin-bottom:12px; font-weight:700; color:var(--accent);">
-            ⚠️ Important: Remember your Name, Costume, Secret Number, and Favorite Animal for voting!
-        </div>
-        <div class="grid">
-           <div class="row">
+        <div class="card">
+            <h2>2) Vote Your Top 3</h2>
+            <div class="grid">
                 <div>
-                    <label>Name</label>
-                    <input id="r_name" placeholder="e.g., Anuj" />
+                    <label>Your Name (for verification)</label>
+                    <input id="v_voter_name" placeholder="e.g., Jane Doe" />
                 </div>
-                <div>
-                    <label>Costume</label>
-                    <input id="r_costume" placeholder="e.g., Vampire Hunter" />
+                <!-- <label>Verification Code Components (N, C, L, A)</label> -->
+                <div class="row">
+                    <div>
+                        <label>Your Name's First Letter</label>
+                        <input id="v_name_start" placeholder="Name's 1st" maxlength="1" style="text-transform:uppercase" />
+                    </div>
+                    <div>
+                        <label>Your Costume's First Letter</label>
+                        <input id="v_costume_start" placeholder="Costume's 1st" maxlength="1" style="text-transform:uppercase" />
+                    </div>
+                    <div>
+                        <label>Secret Number</label>
+                        <input id="v_secret_num" placeholder="Secret Number" type="text" pattern="\d{1,2}" maxlength="2"/>
+                    </div>
+                    <div>
+                        <label>Your Favourite Animal's First Letter</label>
+                        <input id="v_fav_animal_start" placeholder="Animal's 1st" maxlength="1" style="text-transform:uppercase" />
+                    </div>
                 </div>
-                <div>
-                    <label>Secret Number</label>
-                    <input id="r_fav_num" placeholder="e.g., 25" type="text" pattern="\d{1,2}" maxlength="2" />
-                </div>
-                <div>
-                    <label>Favorite Animal</label>
-                    <input id="r_fav_animal" placeholder="e.g., Dragon" />
-                </div>
-            </div> 
-            <!-- <div>
-                <label>Photo URL (optional)</label>
-                <input id="r_photo" placeholder="https://…" />
-            </div> -->
-            <button id="btnRegister">Register Contestant</button>
-        <!-- </div> -->
-            <!-- <p class="muted">Note: Anyone can register; only admin can mint ballot codes.</p> -->
-        <!-- </div> -->
-    </div> 
 
-   <div class="card">
-        <h2>2) Vote Your Top 3</h2>
-        <div class="grid">
-            <div>
-                <label>Your Name (for verification)</label>
-                <input id="v_voter_name" placeholder="e.g., Jane Doe" />
+                <div class="grid cols-3">
+                    <div>
+                        <label>1st (3 pts)</label>
+                        <select id="v_first"></select>
+                    </div>
+                    <div>
+                        <label>2nd (2 pts)</label>
+                        <select id="v_second"></select>
+                    </div>
+                    <div>
+                        <label>3rd (1 pt)</label>
+                        <select id="v_third"></select>
+                    </div>
+                </div>
+
+                <div id="vote-status" style="margin-top: 10px;"></div>
+                <button id="btnVote">Submit Vote</button>
             </div>
-            <!-- <label>Verification Code Components (N, C, L, A)</label> -->
-            <div class="row">
-                <div>
-                    <label>Your Name's First Letter</label>
-                    <input id="v_name_start" placeholder="Name's 1st" maxlength="1" style="text-transform:uppercase" />
-                </div>
-                <div>
-                    <label>Your Costume's First Letter</label>
-                    <input id="v_costume_start" placeholder="Costume's 1st" maxlength="1" style="text-transform:uppercase" />
-                </div>
-                <div>
-                    <label>Secret Number</label>
-                    <input id="v_secret_num" placeholder="Secret Number" type="text" pattern="\d{1,2}" maxlength="2"/>
-                </div>
-                <div>
-                    <label>Your Favourite Animal's First Letter</label>
-                    <input id="v_fav_animal_start" placeholder="Animal's 1st" maxlength="1" style="text-transform:uppercase" />
-                </div>
+        </div> 
+        <details class="card">
+            <summary><b>Host: View Results</b></summary>
+            <div class="grid">
+                <label>Admin Key</label>
+                <input id="r_key" placeholder="Host-only" type="password" />
+                <button id="btnResults">Refresh Leaderboard</button>
+                <div id="results"></div>
             </div>
+        </details>
 
-            <div class="grid cols-3">
-                <div>
-                    <label>1st (3 pts)</label>
-                    <select id="v_first"></select>
-                </div>
-                <div>
-                    <label>2nd (2 pts)</label>
-                    <select id="v_second"></select>
-                </div>
-                <div>
-                    <label>3rd (1 pt)</label>
-                    <select id="v_third"></select>
-                </div>
-            </div>
-            <button id="btnVote">Submit Vote</button>
+
+        <div class="card">
+            <h3>Current Contestants</h3>
+            <div id="list"></div>
         </div>
-    </div> 
-    <details class="card">
-        <summary><b>Host: View Results</b></summary>
-        <div class="grid">
-            <label>Admin Key</label>
-            <input id="r_key" placeholder="Host-only" type="password" />
-            <button id="btnResults">Refresh Leaderboard</button>
-            <div id="results"></div>
-        </div>
-    </details>
-
-
-    <div class="card">
-        <h3>Current Contestants</h3>
-        <div id="list"></div>
     </div>
-</div>
-<script>
-    // const API_BASE="https://script.google.com/macros/s/AKfycbztfw7FyogMmsL1lzfs5VvCLRjbmmjGy1i10P8SAoF0xywSFHzzO7uj5GvpuWuRDxBh/exec"
-    const API_BASE="https://halloween-voter.mailforpokhrel.workers.dev" 
-    // Helpers
-    let ALL_CONTESTANTS = [];
+    <script>
+        // const API_BASE="https://script.google.com/macros/s/AKfycbztfw7FyogMmsL1lzfs5VvCLRjbmmjGy1i10P8SAoF0xywSFHzzO7uj5GvpuWuRDxBh/exec"
+        const API_BASE="https://halloween-voter.mailforpokhrel.workers.dev" 
+        // Helpers
+        let ALL_CONTESTANTS = [];
+        const REG_BTN_TEXT = 'Register Contestant';
+        const VOTE_BTN_TEXT = 'Submit Vote';
 
-    const $ = sel => document.querySelector(sel);
-    function msg(txt, cls='') { $('#status').innerHTML = `<span class="${cls}">${txt}</span>`; }
-    async function apiGet(action, params={}) {
-        const url = new URL(API_BASE);
-        url.searchParams.set('action', action);
-        Object.entries(params).forEach(([k,v])=> url.searchParams.set(k,v));
-        const res = await fetch(url.toString());
-        return res.json();
-    }
+        const $ = sel => document.querySelector(sel);
+        function msg(txt, cls='', target='#status') { $(target).innerHTML = `<span class="${cls}">${txt}</span>`; }
+        async function apiGet(action, params={}) {
+            const url = new URL(API_BASE);
+            url.searchParams.set('action', action);
+            Object.entries(params).forEach(([k,v])=> url.searchParams.set(k,v));
+            const res = await fetch(url.toString());
+            return res.json();
+        }
 
-    async function apiPost(action, body={}) {
-        // Send as form-encoded to avoid CORS preflight (no custom headers)
-        const url = `${API_BASE}?action=${encodeURIComponent(action)}`;
-        const form = new URLSearchParams();
-        Object.entries(body).forEach(([k,v]) => form.append(k, v));
-        const res = await fetch(url, { method:'POST', body: form });
-        return res.json();
-    }
+        function setBtnLoading(btnSel, isLoading, originalText) {
+            const btn = $(btnSel);
+            if (isLoading) {
+                btn.setAttribute('disabled', 'disabled');
+                btn.innerHTML = '⏳ Loading...';
+            } else {
+                btn.removeAttribute('disabled');
+                btn.innerHTML = originalText;
+            }
+        } 
+
+        async function apiPost(action, body={}) {
+            // Send as form-encoded to avoid CORS preflight (no custom headers)
+            const url = `${API_BASE}?action=${encodeURIComponent(action)}`;
+            const form = new URLSearchParams();
+            Object.entries(body).forEach(([k,v]) => form.append(k, v));
+            const res = await fetch(url, { method:'POST', body: form });
+            return res.json();
+        }
 
 
-    // ======= UI FILLERS =======
-    async function loadContestants() {
-        const r = await apiGet('list_contestants');
-        if (!r.ok) return msg(r.error, 'err');
-        ALL_CONTESTANTS = r.data || []; // <-- SAVE DATA GLOBALLY
-        
-        // ... rest of loadContestants remains the same (filling the dropdowns) ...
-        const arr = ALL_CONTESTANTS; // Use the global array
-        // Fill selects with ALL options initially
-        const opts = ['<option value="">-- choose --</option>'].concat(arr.map(c=>`<option value="${c.id}">${c.displayName} — ${c.costume||''}</option>`));
-        ['#v_first','#v_second','#v_third'].forEach(sel => $(sel).innerHTML = opts.join(''));
-        $('#list').innerHTML = arr.map(c => `
-            <div class="contestant">
-                <img src="${c.photoUrl||'https://placehold.co/80x80?text=🎃'}" alt="photo" />
-                <div>
-                    <div><b>${c.displayName}</b> <span class="muted">${c.costume||''}</span></div>
-                    <div class="muted">ID: ${c.id}</div>
+        // ======= UI FILLERS =======
+        async function loadContestants() {
+            const r = await apiGet('list_contestants');
+            if (!r.ok) return msg(r.error, 'err');
+            ALL_CONTESTANTS = r.data || []; // <-- SAVE DATA GLOBALLY
+            
+            // ... rest of loadContestants remains the same (filling the dropdowns) ...
+            const arr = ALL_CONTESTANTS; // Use the global array
+            // Fill selects with ALL options initially
+            const opts = ['<option value="">-- choose --</option>'].concat(arr.map(c=>`<option value="${c.id}">${c.displayName} — ${c.costume||''}</option>`));
+            ['#v_first','#v_second','#v_third'].forEach(sel => $(sel).innerHTML = opts.join(''));
+            $('#list').innerHTML = arr.map(c => `
+                <div class="contestant">
+                    <img src="${c.photoUrl||'https://placehold.co/80x80?text=🎃'}" alt="photo" />
+                    <div>
+                        <div><b>${c.displayName}</b> <span class="muted">${c.costume||''}</span></div>
+                        <div class="muted">ID: ${c.id}</div>
+                    </div>
                 </div>
-            </div>
-        `).join('') || '<div class="muted">No contestants yet.</div>';
-    }
-
-    // Prevent duplicate picks
-    function validatePicks() {
-        const a = $('#v_first').value, b = $('#v_second').value, c = $('#v_third').value;
-        const set = new Set([a,b,c].filter(Boolean));
-        if ([a,b,c].some(x=>!x) || set.size !== 3) return false;
-        return true;
-    }
-
-    function refreshPicks() {
-        const firstVal = $('#v_first').value;
-        const secondVal = $('#v_second').value;
-        const thirdVal = $('#v_third').value;
-
-        const selectedIds = new Set([firstVal, secondVal, thirdVal].filter(Boolean));
-
-        const getOptions = (currentVal) => {
-            const available = ALL_CONTESTANTS.filter(c => 
-                c.id === currentVal || !selectedIds.has(c.id) // Keep current selection OR if not selected elsewhere
-            );
-            const opts = ['<option value="">-- choose --</option>'].concat(
-                available.map(c => `<option value="${c.id}" ${c.id === currentVal ? 'selected' : ''}>${c.displayName} — ${c.costume||''}</option>`)
-            );
-            return opts.join('');
-        };
-
-        $('#v_first').innerHTML = getOptions(firstVal);
-        $('#v_second').innerHTML = getOptions(secondVal);
-        $('#v_third').innerHTML = getOptions(thirdVal);
-    }
-
-
-    $('#btnRegister').addEventListener('click', async ()=>{
-        const displayName = $('#r_name').value.trim();
-        const costume = $('#r_costume').value.trim();
-        const secretNum = $('#r_fav_num').value.trim(); // <-- NEW ID
-        const favAnimal = $('#r_fav_animal').value.trim();
-        // const photoUrl = $('#r_photo').value.trim();
-
-        if (!displayName) return msg('Please enter a name', 'err');
-        // New validation for Secret Number (1-2 digits)
-        if (!secretNum || !/^\d{1,2}$/.test(secretNum)) return msg('Secret Number must be 1 or 2 digits.', 'err');
-        if (!favAnimal) return msg('Please enter your favorite animal', 'err');
-
-        // Pass secretNum instead of favLetter
-        const r = await apiPost('register_contestant', { displayName, costume, secretNum, favAnimal});
-        if (r.ok) { 
-            msg('Registered! ID: '+r.data.id, 'ok'); 
-            $('#r_name').value=''; 
-            $('#r_costume').value=''; 
-            $('#r_fav_num').value=''; // <-- Clear new field
-            $('#r_fav_animal').value=''; 
-            loadContestants(); 
+            `).join('') || '<div class="muted">No contestants yet.</div>';
         }
-        else msg(r.error, 'err');
-    });
 
-    // index.html <script>
-    $('#btnVote').addEventListener('click', async ()=>{
-        const voterName = $('#v_voter_name').value.trim();
-
-        const nameStart = $('#v_name_start').value.trim().toUpperCase();
-        const costumeStart = $('#v_costume_start').value.trim().toUpperCase();
-        const secretNum = $('#v_secret_num').value.trim(); // <-- NEW ID
-        const favAnimalStart = $('#v_fav_animal_start').value.trim().toUpperCase();
-
-        // Construct the code: N + C + S + A (where S is 1-2 digits)
-        const code = nameStart + costumeStart + secretNum + favAnimalStart; 
-
-        // Validation for Secret Number in code length check (code is 4 or 5 characters long)
-        if (!voterName || code.length < 4 || code.length > 5) return msg('Please enter your name and all four code components correctly.', 'err');
-        if (!validatePicks()) return msg('Choose three different contestants.', 'err');
-
-        const body = { code, voterName, first: $('#v_first').value, second: $('#v_second').value, third: $('#v_third').value };
-        
-        const r = await apiPost('submit_vote', body);
-        
-        if (r.ok) { 
-            msg('Vote submitted! Thank you 🎉','ok'); 
-            $('#v_voter_name').value = '';
-            $('#v_name_start').value = '';
-            $('#v_costume_start').value = '';
-            $('#v_secret_num').value = ''; // <-- Clear new field
-            $('#v_fav_animal_start').value = '';
-            ['#v_first','#v_second','#v_third'].forEach(s=>$(s).selectedIndex=0); 
+        // Prevent duplicate picks
+        function validatePicks() {
+            const a = $('#v_first').value, b = $('#v_second').value, c = $('#v_third').value;
+            const set = new Set([a,b,c].filter(Boolean));
+            if ([a,b,c].some(x=>!x) || set.size !== 3) return false;
+            return true;
         }
-        else msg(r.error, 'err');
-    });
 
-    $('#btnResults').addEventListener('click', async ()=>{
-        const key = $('#r_key').value.trim();
-        const r = await apiGet('results', { key });
-        if (!r.ok) return msg(r.error, 'err');
-        const { totalVotes, leaderboard } = r.data;
-        const rows = (leaderboard||[]).map((x,i)=>`<tr><td>${i+1}</td><td>${x.name}</td><td>${x.points}</td><td>${x.firsts}</td><td>${x.seconds}</td><td>${x.thirds}</td></tr>`).join('');
-        $('#results').innerHTML = `
-            <div class="muted">Total ballots: <b>${totalVotes}</b></div>
-            <table style="width:100%;border-collapse:collapse;margin-top:8px">
-                <thead><tr><th>#</th><th>Name</th><th>Pts</th><th>1st</th><th>2nd</th><th>3rd</th></tr></thead>
-                <tbody>${rows}</tbody>
-            </table>`;
-        msg('Results loaded', 'ok');
-    });
+        function refreshPicks() {
+            const firstVal = $('#v_first').value;
+            const secondVal = $('#v_second').value;
+            const thirdVal = $('#v_third').value;
 
-    $('#v_first').addEventListener('change', refreshPicks);
-    $('#v_second').addEventListener('change', refreshPicks);
-    $('#v_third').addEventListener('change', refreshPicks);
+            const selectedIds = new Set([firstVal, secondVal, thirdVal].filter(Boolean));
+
+            const getOptions = (currentVal) => {
+                const available = ALL_CONTESTANTS.filter(c => 
+                    c.id === currentVal || !selectedIds.has(c.id) // Keep current selection OR if not selected elsewhere
+                );
+                const opts = ['<option value="">-- choose --</option>'].concat(
+                    available.map(c => `<option value="${c.id}" ${c.id === currentVal ? 'selected' : ''}>${c.displayName} — ${c.costume||''}</option>`)
+                );
+                return opts.join('');
+            };
+
+            $('#v_first').innerHTML = getOptions(firstVal);
+            $('#v_second').innerHTML = getOptions(secondVal);
+            $('#v_third').innerHTML = getOptions(thirdVal);
+        }
 
 
-    // Initial load
-    loadContestants();
-</script>
+        $('#btnRegister').addEventListener('click', async ()=>{
+            msg('', '', '#reg-status');
+
+            const displayName = $('#r_name').value.trim();
+            const costume = $('#r_costume').value.trim();
+            const secretNum = $('#r_fav_num').value.trim(); // <-- NEW ID
+            const favAnimal = $('#r_fav_animal').value.trim();
+            // const photoUrl = $('#r_photo').value.trim();
+
+            if (!displayName) return msg('Please enter a name', 'err');
+            // New validation for Secret Number (1-2 digits)
+            if (!secretNum || !/^\d{1,2}$/.test(secretNum)) return msg('Secret Number must be 1 or 2 digits.', 'err');
+            if (!favAnimal) return msg('Please enter your favorite animal', 'err');
+
+            setBtnLoading('#btnRegister', true, REG_BTN_TEXT); // Show loading
+
+            try{
+            // Pass secretNum instead of favLetter
+                    const r = await apiPost('register_contestant', { displayName, costume, secretNum, favAnimal});
+                    if (r.ok) { 
+                        msg('Registered! ID: '+r.data.id, 'ok'); 
+                        $('#r_name').value=''; 
+                        $('#r_costume').value=''; 
+                        $('#r_fav_num').value=''; // <-- Clear new field
+                        $('#r_fav_animal').value=''; 
+                        loadContestants(); 
+                    }
+                    else msg(r.error, 'err');
+            } catch (err) {
+                msg('Network Error: ' + err.message, 'err', '#reg-status');
+            } finally {
+                setBtnLoading('#btnRegister', false, REG_BTN_TEXT); // Hide loading
+            }
+            
+        });
+
+        // index.html <script>
+        $('#btnVote').addEventListener('click', async ()=>{
+            // Clear previous status in the card's local status holder
+            msg('', '', '#vote-status'); 
+
+            const voterName = $('#v_voter_name').value.trim();
+            const nameStart = $('#v_name_start').value.trim().toUpperCase();
+            const costumeStart = $('#v_costume_start').value.trim().toUpperCase();
+            const secretNum = $('#v_secret_num').value.trim();
+            const favAnimalStart = $('#v_fav_animal_start').value.trim().toUpperCase();
+            const code = nameStart + costumeStart + secretNum + favAnimalStart;
+
+            if (!voterName || code.length < 4 || code.length > 5) return msg('Please enter your name and all four code components correctly.', 'err', '#vote-status');
+            if (!validatePicks()) return msg('Choose three different contestants.', 'err', '#vote-status');
+            
+            setBtnLoading('#btnVote', true, VOTE_BTN_TEXT); // Show loading
+
+            const body = { code, voterName, first: $('#v_first').value, second: $('#v_second').value, third: $('#v_third').value };
+            
+            try {
+                const r = await apiPost('submit_vote', body);
+                
+                if (r.ok) { 
+                    msg('Vote submitted! Thank you 🎉','ok', '#vote-status'); // Message to local status
+                    $('#v_voter_name').value = '';
+                    $('#v_name_start').value = '';
+                    $('#v_costume_start').value = '';
+                    $('#v_secret_num').value = '';
+                    $('#v_fav_animal_start').value = '';
+                    ['#v_first','#v_second','#v_third'].forEach(s=>$(s).selectedIndex=0); 
+                }
+                else msg(r.error, 'err', '#vote-status'); // Message to local status
+            } catch (err) {
+                msg('Network Error: ' + err.message, 'err', '#vote-status');
+            } finally {
+                setBtnLoading('#btnVote', false, VOTE_BTN_TEXT); // Hide loading
+            }
+        }); 
+
+        $('#btnResults').addEventListener('click', async ()=>{
+            const key = $('#r_key').value.trim();
+            const r = await apiGet('results', { key });
+            if (!r.ok) return msg(r.error, 'err');
+            const { totalVotes, leaderboard } = r.data;
+            const rows = (leaderboard||[]).map((x,i)=>`<tr><td>${i+1}</td><td>${x.name}</td><td>${x.points}</td><td>${x.firsts}</td><td>${x.seconds}</td><td>${x.thirds}</td></tr>`).join('');
+            $('#results').innerHTML = `
+                <div class="muted">Total ballots: <b>${totalVotes}</b></div>
+                <table style="width:100%;border-collapse:collapse;margin-top:8px">
+                    <thead><tr><th>#</th><th>Name</th><th>Pts</th><th>1st</th><th>2nd</th><th>3rd</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>`;
+            msg('Results loaded', 'ok');
+        });
+
+        $('#v_first').addEventListener('change', refreshPicks);
+        $('#v_second').addEventListener('change', refreshPicks);
+        $('#v_third').addEventListener('change', refreshPicks);
+
+
+        // Initial load
+        loadContestants();
+    </script>
 </body>
 </html>
