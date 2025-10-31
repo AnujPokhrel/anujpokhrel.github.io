@@ -5,11 +5,30 @@
     <title>🎃 Costume Contest Voting</title>
     <style>
         :root { --bg:#0b0b0f; --card:#141420; --ink:#e6e6f2; --muted:#9aa0b4; --accent:#ff7a18; }
-        *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto; background:var(--bg); color:var(--ink)}
-        header{padding:24px;text-align:center}
+        /* :root { --bg:#0b0b0f; --card:#141420; --ink:#e6e6f2; --muted:#9aa0b4; --accent:#ff7a18; } */
+        *{box-sizing:border-box} 
+        body{
+            margin:0;
+            font-family:system-ui,-apple-system,Segoe UI,Roboto; 
+            background:var(--bg); 
+            color:var(--ink);
+            
+            /* --- NEW BACKGROUND STYLES --- */
+            background-image: url('HalloweenRobertsRd.png'); /* Replace with actual URL */
+            background-size: cover; /* Cover the entire page */
+            background-position: center top; /* Center the image */
+            background-attachment: fixed; /* Keep image fixed when scrolling */
+            background-color: #000; /* Fallback color */
+            /* --- END NEW BACKGROUND STYLES --- */
+        }
+        header{padding:24px;text-align:center; background:rgba(0,0,0,0.8);} /* Add background to header for readability */
+        /* *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto; background:var(--bg); color:var(--ink)} */
+        /* header{padding:24px;text-align:center} */
         h1{margin:0 0 6px;font-size:28px}
-        .wrap{max-width:880px;margin:0 auto;padding:16px}
-        .card{background:var(--card); border:1px solid #23233a; border-radius:16px; padding:16px; box-shadow:0 1px 12px rgba(0,0,0,.25); margin:12px 0}
+        /* .wrap{max-width:880px;margin:0 auto;padding:16px} */
+        /* .card{background:var(--card); border:1px solid #23233a; border-radius:16px; padding:16px; box-shadow:0 1px 12px rgba(0,0,0,.25); margin:12px 0} */
+        .wrap{max-width:880px;margin:0 auto;padding:16px; background:rgba(0,0,0,0.3);} 
+        .card{background:rgba(20,20,32,0.4); border:1px solid #23233a; border-radius:16px; padding:16px; box-shadow:0 1px 12px rgba(0,0,0,.25); margin:12px 0}; /* Make cards semi-transparent for background visibility */
         label{display:block;margin:8px 0 4px;color:var(--muted)}
         input,select,button,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #2b2b44;background:#0e0e18;color:var(--ink)}
         button{cursor:pointer;background:var(--accent);border:none;color:#1b0b00;font-weight:700}
@@ -37,6 +56,9 @@
 
    <div class="card">
         <h2>1) Register a Contestant</h2>
+        <div style="padding:10px; border:2px solid var(--accent); border-radius:8px; margin-bottom:12px; font-weight:700; color:var(--accent);">
+            ⚠️ Important: Remember your Name, Costume, Secret Number, and Favorite Animal for voting!
+        </div>
         <div class="grid">
            <div class="row">
                 <div>
@@ -48,8 +70,8 @@
                     <input id="r_costume" placeholder="e.g., Vampire Hunter" />
                 </div>
                 <div>
-                    <label>Favorite Letter</label>
-                    <input id="r_fav_letter" placeholder="e.g., X" maxlength="1" style="text-transform:uppercase" />
+                    <label>Secret Number</label>
+                    <input id="r_fav_letter" placeholder="e.g., 25" type="number" min="0" max="99" maxlength="2" />
                 </div>
                 <div>
                     <label>Favorite Animal</label>
@@ -73,7 +95,7 @@
                 <label>Your Name (for verification)</label>
                 <input id="v_voter_name" placeholder="e.g., Jane Doe" />
             </div>
-            <label>Verification Code Components (N, C, L, A)</label>
+            <!-- <label>Verification Code Components (N, C, L, A)</label> -->
             <div class="row">
                 <div>
                     <label>Your Name's First Letter</label>
@@ -84,11 +106,11 @@
                     <input id="v_costume_start" placeholder="Costume's 1st" maxlength="1" style="text-transform:uppercase" />
                 </div>
                 <div>
-                    <label>Your Favourite Letter</label>
-                    <input id="v_fav_letter" placeholder="Fav Letter" maxlength="1" style="text-transform:uppercase" />
+                    <label>Secret Number</label>
+                    <input id="v_fav_num" placeholder="Secret Number" type="number" min="0" max="99" maxlength="2"/>
                 </div>
                 <div>
-                    <label>Your Favourite Animal</label>
+                    <label>Your Favourite Animal's First Letter</label>
                     <input id="v_fav_animal_start" placeholder="Animal's 1st" maxlength="1" style="text-transform:uppercase" />
                 </div>
             </div>
@@ -208,12 +230,12 @@
     $('#btnRegister').addEventListener('click', async ()=>{
         const displayName = $('#r_name').value.trim();
         const costume = $('#r_costume').value.trim();
-        const favLetter = $('#r_fav_letter').value.trim().toUpperCase();
+        const secreteNum = $('#r_secret_num').value.trim();
         const favAnimal = $('#r_fav_animal').value.trim(); // <-- New
         const photoUrl = $('#r_photo').value.trim();
 
         if (!displayName) return msg('Please enter a name', 'err');
-        if (!favLetter || favLetter.length !== 1) return msg('Please enter your favorite letter', 'err');
+        if (!secreteNum|| !/^\d{1,2}$/.test(secretNum)) return msg('Secret Number must be 1 or 2 digits.', 'err');
         if (!favAnimal) return msg('Please enter your favorite animal', 'err'); // <-- New Validation
 
         const r = await apiPost('register_contestant', { displayName, costume, favLetter, favAnimal, photoUrl }); // <-- Pass favAnimal
@@ -221,7 +243,7 @@
             msg('Registered! ID: '+r.data.id, 'ok'); 
             $('#r_name').value=''; 
             $('#r_costume').value=''; 
-            $('#r_fav_letter').value=''; 
+            $('#r_secret_num').value=''; 
             $('#r_fav_animal').value=''; // <-- Clear new field
             $('#r_photo').value=''; 
             loadContestants(); 
@@ -235,11 +257,11 @@
 
         const nameStart = $('#v_name_start').value.trim().toUpperCase();
         const costumeStart = $('#v_costume_start').value.trim().toUpperCase();
-        const favLetter = $('#v_fav_letter').value.trim().toUpperCase();
+        const secretNum= $('#v_secret_num').value.trim();
         const favAnimalStart = $('#v_fav_animal_start').value.trim().toUpperCase(); // <-- NEW
 
         // Construct the 4-character ballot code
-        const code = nameStart + costumeStart + favLetter + favAnimalStart; // <-- 4-char code
+        const code = nameStart + costumeStart + secretNum + favAnimalStart; // <-- 4-char code
 
         if (!voterName || code.length !== 4) return msg('Please enter your name and all four code components.', 'err'); // <-- Updated Validation
         if (!validatePicks()) return msg('Choose three different contestants.', 'err');
@@ -253,7 +275,7 @@
             $('#v_voter_name').value = ''; // Clear name
             $('#v_name_start').value = '';
             $('#v_costume_start').value = '';
-            $('#v_fav_letter').value = '';
+            $('#v_secret_num').value = '';
             $('#v_fav_animal_start').value = ''; // Clear new field
             ['#v_first','#v_second','#v_third'].forEach(s=>$(s).selectedIndex=0); 
         }
