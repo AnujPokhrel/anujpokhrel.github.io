@@ -71,21 +71,21 @@
                 </div>
                 <div>
                     <label>Secret Number</label>
-                    <input id="r_fav_letter" placeholder="e.g., 25" type="number" min="0" max="99" maxlength="2" />
+                    <input id="r_fav_num" placeholder="e.g., 25" type="text" pattern="\d{1,2}" maxlength="2" />
                 </div>
                 <div>
                     <label>Favorite Animal</label>
                     <input id="r_fav_animal" placeholder="e.g., Dragon" />
                 </div>
             </div> 
-            <div>
+            <!-- <div>
                 <label>Photo URL (optional)</label>
                 <input id="r_photo" placeholder="https://…" />
-            </div>
+            </div> -->
             <button id="btnRegister">Register Contestant</button>
-        </div>
-            <p class="muted">Note: Anyone can register; only admin can mint ballot codes.</p>
-        </div>
+        <!-- </div> -->
+            <!-- <p class="muted">Note: Anyone can register; only admin can mint ballot codes.</p> -->
+        <!-- </div> -->
     </div> 
 
    <div class="card">
@@ -107,7 +107,7 @@
                 </div>
                 <div>
                     <label>Secret Number</label>
-                    <input id="v_fav_num" placeholder="Secret Number" type="number" min="0" max="99" maxlength="2"/>
+                    <input id="v_secret_num" placeholder="Secret Number" type="text" pattern="\d{1,2}" maxlength="2"/>
                 </div>
                 <div>
                     <label>Your Favourite Animal's First Letter</label>
@@ -230,22 +230,23 @@
     $('#btnRegister').addEventListener('click', async ()=>{
         const displayName = $('#r_name').value.trim();
         const costume = $('#r_costume').value.trim();
-        const secreteNum = $('#r_secret_num').value.trim();
-        const favAnimal = $('#r_fav_animal').value.trim(); // <-- New
-        const photoUrl = $('#r_photo').value.trim();
+        const secretNum = $('#r_fav_num').value.trim(); // <-- NEW ID
+        const favAnimal = $('#r_fav_animal').value.trim();
+        // const photoUrl = $('#r_photo').value.trim();
 
         if (!displayName) return msg('Please enter a name', 'err');
-        if (!secreteNum|| !/^\d{1,2}$/.test(secretNum)) return msg('Secret Number must be 1 or 2 digits.', 'err');
-        if (!favAnimal) return msg('Please enter your favorite animal', 'err'); // <-- New Validation
+        // New validation for Secret Number (1-2 digits)
+        if (!secretNum || !/^\d{1,2}$/.test(secretNum)) return msg('Secret Number must be 1 or 2 digits.', 'err');
+        if (!favAnimal) return msg('Please enter your favorite animal', 'err');
 
-        const r = await apiPost('register_contestant', { displayName, costume, favLetter, favAnimal, photoUrl }); // <-- Pass favAnimal
+        // Pass secretNum instead of favLetter
+        const r = await apiPost('register_contestant', { displayName, costume, secretNum, favAnimal});
         if (r.ok) { 
             msg('Registered! ID: '+r.data.id, 'ok'); 
             $('#r_name').value=''; 
             $('#r_costume').value=''; 
-            $('#r_secret_num').value=''; 
-            $('#r_fav_animal').value=''; // <-- Clear new field
-            $('#r_photo').value=''; 
+            $('#r_fav_num').value=''; // <-- Clear new field
+            $('#r_fav_animal').value=''; 
             loadContestants(); 
         }
         else msg(r.error, 'err');
@@ -253,30 +254,31 @@
 
     // index.html <script>
     $('#btnVote').addEventListener('click', async ()=>{
-        const voterName = $('#v_voter_name').value.trim(); // <-- NEW
+        const voterName = $('#v_voter_name').value.trim();
 
         const nameStart = $('#v_name_start').value.trim().toUpperCase();
         const costumeStart = $('#v_costume_start').value.trim().toUpperCase();
-        const secretNum= $('#v_secret_num').value.trim();
-        const favAnimalStart = $('#v_fav_animal_start').value.trim().toUpperCase(); // <-- NEW
+        const secretNum = $('#v_secret_num').value.trim(); // <-- NEW ID
+        const favAnimalStart = $('#v_fav_animal_start').value.trim().toUpperCase();
 
-        // Construct the 4-character ballot code
-        const code = nameStart + costumeStart + secretNum + favAnimalStart; // <-- 4-char code
+        // Construct the code: N + C + S + A (where S is 1-2 digits)
+        const code = nameStart + costumeStart + secretNum + favAnimalStart; 
 
-        if (!voterName || code.length !== 4) return msg('Please enter your name and all four code components.', 'err'); // <-- Updated Validation
+        // Validation for Secret Number in code length check (code is 4 or 5 characters long)
+        if (!voterName || code.length < 4 || code.length > 5) return msg('Please enter your name and all four code components correctly.', 'err');
         if (!validatePicks()) return msg('Choose three different contestants.', 'err');
 
-        const body = { code, voterName, first: $('#v_first').value, second: $('#v_second').value, third: $('#v_third').value }; // <-- Pass voterName
+        const body = { code, voterName, first: $('#v_first').value, second: $('#v_second').value, third: $('#v_third').value };
         
         const r = await apiPost('submit_vote', body);
         
         if (r.ok) { 
             msg('Vote submitted! Thank you 🎉','ok'); 
-            $('#v_voter_name').value = ''; // Clear name
+            $('#v_voter_name').value = '';
             $('#v_name_start').value = '';
             $('#v_costume_start').value = '';
-            $('#v_secret_num').value = '';
-            $('#v_fav_animal_start').value = ''; // Clear new field
+            $('#v_secret_num').value = ''; // <-- Clear new field
+            $('#v_fav_animal_start').value = '';
             ['#v_first','#v_second','#v_third'].forEach(s=>$(s).selectedIndex=0); 
         }
         else msg(r.error, 'err');
