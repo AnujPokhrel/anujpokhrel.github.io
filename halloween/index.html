@@ -38,7 +38,7 @@
    <div class="card">
         <h2>1) Register a Contestant</h2>
         <div class="grid">
-            <div class="row">
+           <div class="row">
                 <div>
                     <label>Name</label>
                     <input id="r_name" placeholder="e.g., Anuj" />
@@ -51,7 +51,11 @@
                     <label>Favorite Letter</label>
                     <input id="r_fav_letter" placeholder="e.g., X" maxlength="1" style="text-transform:uppercase" />
                 </div>
-            </div>
+                <div>
+                    <label>Favorite Animal</label>
+                    <input id="r_fav_animal" placeholder="e.g., Dragon" />
+                </div>
+            </div> 
             <div>
                 <label>Photo URL (optional)</label>
                 <input id="r_photo" placeholder="https://…" />
@@ -65,21 +69,30 @@
    <div class="card">
         <h2>2) Vote Your Top 3</h2>
         <div class="grid">
+            <div>
+                <label>Your Name (for verification)</label>
+                <input id="v_voter_name" placeholder="e.g., Jane Doe" />
+            </div>
+            <label>Verification Code Components (N, C, L, A)</label>
             <div class="row">
                 <div>
-                    <label>First Letter of Name</label>
-                    <input id="v_name_start" placeholder="e.g., A" maxlength="1" style="text-transform:uppercase" />
+                    <label>Your Name's First Letter</label>
+                    <input id="v_name_start" placeholder="Name's 1st" maxlength="1" style="text-transform:uppercase" />
                 </div>
                 <div>
-                    <label>First Letter of Costume</label>
-                    <input id="v_costume_start" placeholder="e.g., V" maxlength="1" style="text-transform:uppercase" />
+                    <label>Your Costume's First Letter</label>
+                    <input id="v_costume_start" placeholder="Costume's 1st" maxlength="1" style="text-transform:uppercase" />
                 </div>
                 <div>
-                    <label>Favorite Letter</label>
-                    <input id="v_fav_letter" placeholder="e.g., X" maxlength="1" style="text-transform:uppercase" />
+                    <label>Your Favourite Letter</label>
+                    <input id="v_fav_letter" placeholder="Fav Letter" maxlength="1" style="text-transform:uppercase" />
+                </div>
+                <div>
+                    <label>Your Favourite Animal</label>
+                    <input id="v_fav_animal_start" placeholder="Animal's 1st" maxlength="1" style="text-transform:uppercase" />
                 </div>
             </div>
-            
+
             <div class="grid cols-3">
                 <div>
                     <label>1st (3 pts)</label>
@@ -97,35 +110,11 @@
             <button id="btnVote">Submit Vote</button>
         </div>
     </div> 
-    <!-- <div class="card">
-        <h2>3) Vote Your Top 3</h2>
-        <div class="grid">
-            <label>Ballot Code</label>
-            <input id="v_code" placeholder="6‑char code" />
-            <div class="grid cols-3">
-                <div>
-                    <label>1st (3 pts)</label>
-                    <select id="v_first"></select>
-                </div>
-                <div>
-                    <label>2nd (2 pts)</label>
-                    <select id="v_second"></select>
-                </div>
-                <div>
-                    <label>3rd (1 pt)</label>
-                    <select id="v_third"></select>
-                </div>
-            </div>
-            <button id="btnVote">Submit Vote</button>
-        </div>
-    </div>
- -->
-
     <details class="card">
         <summary><b>Host: View Results</b></summary>
         <div class="grid">
             <label>Admin Key</label>
-            <input id="r_key" placeholder="Host-only" />
+            <input id="r_key" placeholder="Host-only" type="password" />
             <button id="btnResults">Refresh Leaderboard</button>
             <div id="results"></div>
         </div>
@@ -141,6 +130,8 @@
     // const API_BASE="https://script.google.com/macros/s/AKfycbztfw7FyogMmsL1lzfs5VvCLRjbmmjGy1i10P8SAoF0xywSFHzzO7uj5GvpuWuRDxBh/exec"
     const API_BASE="https://halloween-voter.mailforpokhrel.workers.dev" 
     // Helpers
+    let ALL_CONTESTANTS = [];
+
     const $ = sel => document.querySelector(sel);
     function msg(txt, cls='') { $('#status').innerHTML = `<span class="${cls}">${txt}</span>`; }
     async function apiGet(action, params={}) {
@@ -165,11 +156,13 @@
     async function loadContestants() {
         const r = await apiGet('list_contestants');
         if (!r.ok) return msg(r.error, 'err');
-        const arr = r.data || [];
-        // Fill selects
+        ALL_CONTESTANTS = r.data || []; // <-- SAVE DATA GLOBALLY
+        
+        // ... rest of loadContestants remains the same (filling the dropdowns) ...
+        const arr = ALL_CONTESTANTS; // Use the global array
+        // Fill selects with ALL options initially
         const opts = ['<option value="">-- choose --</option>'].concat(arr.map(c=>`<option value="${c.id}">${c.displayName} — ${c.costume||''}</option>`));
         ['#v_first','#v_second','#v_third'].forEach(sel => $(sel).innerHTML = opts.join(''));
-        // Render list
         $('#list').innerHTML = arr.map(c => `
             <div class="contestant">
                 <img src="${c.photoUrl||'https://placehold.co/80x80?text=🎃'}" alt="photo" />
@@ -189,21 +182,47 @@
         return true;
     }
 
+    function refreshPicks() {
+        const firstVal = $('#v_first').value;
+        const secondVal = $('#v_second').value;
+        const thirdVal = $('#v_third').value;
+
+        const selectedIds = new Set([firstVal, secondVal, thirdVal].filter(Boolean));
+
+        const getOptions = (currentVal) => {
+            const available = ALL_CONTESTANTS.filter(c => 
+                c.id === currentVal || !selectedIds.has(c.id) // Keep current selection OR if not selected elsewhere
+            );
+            const opts = ['<option value="">-- choose --</option>'].concat(
+                available.map(c => `<option value="${c.id}" ${c.id === currentVal ? 'selected' : ''}>${c.displayName} — ${c.costume||''}</option>`)
+            );
+            return opts.join('');
+        };
+
+        $('#v_first').innerHTML = getOptions(firstVal);
+        $('#v_second').innerHTML = getOptions(secondVal);
+        $('#v_third').innerHTML = getOptions(thirdVal);
+    }
+
+
     $('#btnRegister').addEventListener('click', async ()=>{
         const displayName = $('#r_name').value.trim();
         const costume = $('#r_costume').value.trim();
-        const favLetter = $('#r_fav_letter').value.trim().toUpperCase(); // <-- New
+        const favLetter = $('#r_fav_letter').value.trim().toUpperCase();
+        const favAnimal = $('#r_fav_animal').value.trim(); // <-- New
         const photoUrl = $('#r_photo').value.trim();
 
         if (!displayName) return msg('Please enter a name', 'err');
-        if (!favLetter || favLetter.length !== 1) return msg('Please enter your favorite letter', 'err'); // <-- New Validation
+        if (!favLetter || favLetter.length !== 1) return msg('Please enter your favorite letter', 'err');
+        if (!favAnimal) return msg('Please enter your favorite animal', 'err'); // <-- New Validation
 
-        const r = await apiPost('register_contestant', { displayName, costume, favLetter, photoUrl }); // <-- Pass favLetter
+        const r = await apiPost('register_contestant', { displayName, costume, favLetter, favAnimal, photoUrl }); // <-- Pass favAnimal
         if (r.ok) { 
             msg('Registered! ID: '+r.data.id, 'ok'); 
             $('#r_name').value=''; 
             $('#r_costume').value=''; 
-            $('#r_fav_letter').value=''; // <-- Clear field
+            $('#r_fav_letter').value=''; 
+            $('#r_fav_animal').value=''; // <-- Clear new field
             $('#r_photo').value=''; 
             loadContestants(); 
         }
@@ -212,30 +231,34 @@
 
     // index.html <script>
     $('#btnVote').addEventListener('click', async ()=>{
+        const voterName = $('#v_voter_name').value.trim(); // <-- NEW
+
         const nameStart = $('#v_name_start').value.trim().toUpperCase();
         const costumeStart = $('#v_costume_start').value.trim().toUpperCase();
         const favLetter = $('#v_fav_letter').value.trim().toUpperCase();
-        
-        // Construct the 3-character ballot code for verification
-        const code = nameStart + costumeStart + favLetter;
+        const favAnimalStart = $('#v_fav_animal_start').value.trim().toUpperCase(); // <-- NEW
 
-        if (!nameStart || !costumeStart || !favLetter) return msg('Please enter all three code components for verification.', 'err');
+        // Construct the 4-character ballot code
+        const code = nameStart + costumeStart + favLetter + favAnimalStart; // <-- 4-char code
+
+        if (!voterName || code.length !== 4) return msg('Please enter your name and all four code components.', 'err'); // <-- Updated Validation
         if (!validatePicks()) return msg('Choose three different contestants.', 'err');
 
-        const body = { code, first: $('#v_first').value, second: $('#v_second').value, third: $('#v_third').value };
+        const body = { code, voterName, first: $('#v_first').value, second: $('#v_second').value, third: $('#v_third').value }; // <-- Pass voterName
         
         const r = await apiPost('submit_vote', body);
         
         if (r.ok) { 
             msg('Vote submitted! Thank you 🎉','ok'); 
+            $('#v_voter_name').value = ''; // Clear name
             $('#v_name_start').value = '';
             $('#v_costume_start').value = '';
             $('#v_fav_letter').value = '';
+            $('#v_fav_animal_start').value = ''; // Clear new field
             ['#v_first','#v_second','#v_third'].forEach(s=>$(s).selectedIndex=0); 
         }
         else msg(r.error, 'err');
     });
-
 
     $('#btnResults').addEventListener('click', async ()=>{
         const key = $('#r_key').value.trim();
@@ -251,6 +274,10 @@
             </table>`;
         msg('Results loaded', 'ok');
     });
+
+    $('#v_first').addEventListener('change', refreshPicks);
+    $('#v_second').addEventListener('change', refreshPicks);
+    $('#v_third').addEventListener('change', refreshPicks);
 
 
     // Initial load
