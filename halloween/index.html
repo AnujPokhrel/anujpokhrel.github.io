@@ -35,7 +35,7 @@
         <div class="card" id="status"></div>
 
 
-    <div class="card">
+   <div class="card">
         <h2>1) Register a Contestant</h2>
         <div class="grid">
             <div class="row">
@@ -47,6 +47,10 @@
                     <label>Costume</label>
                     <input id="r_costume" placeholder="e.g., Vampire Hunter" />
                 </div>
+                <div>
+                    <label>Favorite Letter</label>
+                    <input id="r_fav_letter" placeholder="e.g., X" maxlength="1" style="text-transform:uppercase" />
+                </div>
             </div>
             <div>
                 <label>Photo URL (optional)</label>
@@ -56,30 +60,44 @@
         </div>
             <p class="muted">Note: Anyone can register; only admin can mint ballot codes.</p>
         </div>
-    </div>
+    </div> 
 
-
-    <div class="card">
-        <h2>2) Get a Ballot Code (Host)</h2>
+   <div class="card">
+        <h2>2) Vote Your Top 3</h2>
         <div class="grid">
             <div class="row">
                 <div>
-                    <label>Admin Key</label>
-                    <input id="a_key" placeholder="Host-only" />
+                    <label>First Letter of Name</label>
+                    <input id="v_name_start" placeholder="e.g., A" maxlength="1" style="text-transform:uppercase" />
                 </div>
                 <div>
-                    <label>Issue To (optional)</label>
-                    <input id="a_to" placeholder="e.g., Door #1" />
+                    <label>First Letter of Costume</label>
+                    <input id="v_costume_start" placeholder="e.g., V" maxlength="1" style="text-transform:uppercase" />
+                </div>
+                <div>
+                    <label>Favorite Letter</label>
+                    <input id="v_fav_letter" placeholder="e.g., X" maxlength="1" style="text-transform:uppercase" />
                 </div>
             </div>
-            <button id="btnBallot">Generate Ballot Code</button>
-            <div class="muted">Hand this code to a guest. Each code works <b>once</b>.</div>
-            <pre id="ballotOut" style="white-space:pre-wrap"></pre>
+            
+            <div class="grid cols-3">
+                <div>
+                    <label>1st (3 pts)</label>
+                    <select id="v_first"></select>
+                </div>
+                <div>
+                    <label>2nd (2 pts)</label>
+                    <select id="v_second"></select>
+                </div>
+                <div>
+                    <label>3rd (1 pt)</label>
+                    <select id="v_third"></select>
+                </div>
+            </div>
+            <button id="btnVote">Submit Vote</button>
         </div>
-    </div>
-
-
-    <div class="card">
+    </div> 
+    <!-- <div class="card">
         <h2>3) Vote Your Top 3</h2>
         <div class="grid">
             <label>Ballot Code</label>
@@ -101,7 +119,7 @@
             <button id="btnVote">Submit Vote</button>
         </div>
     </div>
-
+ -->
 
     <details class="card">
         <summary><b>Host: View Results</b></summary>
@@ -132,11 +150,6 @@
         const res = await fetch(url.toString());
         return res.json();
     }
-    // async function apiPost(action, body={}) {
-    //     const url = `${API_BASE}?action=${encodeURIComponent(action)}`;
-    //     const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-    //     return res.json();
-    // }
 
     async function apiPost(action, body={}) {
         // Send as form-encoded to avoid CORS preflight (no custom headers)
@@ -176,34 +189,50 @@
         return true;
     }
 
-    // ======= EVENTS =======
     $('#btnRegister').addEventListener('click', async ()=>{
         const displayName = $('#r_name').value.trim();
         const costume = $('#r_costume').value.trim();
+        const favLetter = $('#r_fav_letter').value.trim().toUpperCase(); // <-- New
         const photoUrl = $('#r_photo').value.trim();
+
         if (!displayName) return msg('Please enter a name', 'err');
-        const r = await apiPost('register_contestant', { displayName, costume, photoUrl });
-        if (r.ok) { msg('Registered! ID: '+r.data.id, 'ok'); $('#r_name').value=''; $('#r_costume').value=''; $('#r_photo').value=''; loadContestants(); }
+        if (!favLetter || favLetter.length !== 1) return msg('Please enter your favorite letter', 'err'); // <-- New Validation
+
+        const r = await apiPost('register_contestant', { displayName, costume, favLetter, photoUrl }); // <-- Pass favLetter
+        if (r.ok) { 
+            msg('Registered! ID: '+r.data.id, 'ok'); 
+            $('#r_name').value=''; 
+            $('#r_costume').value=''; 
+            $('#r_fav_letter').value=''; // <-- Clear field
+            $('#r_photo').value=''; 
+            loadContestants(); 
+        }
         else msg(r.error, 'err');
     });
 
-
-    $('#btnBallot').addEventListener('click', async ()=>{
-        const key = $('#a_key').value.trim();
-        const issuedTo = $('#a_to').value.trim();
-        if (!key) return msg('Admin key required to mint ballot codes','err');
-        const r = await apiPost('generate_ballot', { key, issuedTo });
-        if (r.ok) { $('#ballotOut').textContent = `Ballot Code: ${r.data.code}`; msg('Ballot generated.', 'ok'); }
-        else msg(r.error, 'err');
-    });
-
-
+    // index.html <script>
     $('#btnVote').addEventListener('click', async ()=>{
-        const code = $('#v_code').value.trim().toUpperCase();
+        const nameStart = $('#v_name_start').value.trim().toUpperCase();
+        const costumeStart = $('#v_costume_start').value.trim().toUpperCase();
+        const favLetter = $('#v_fav_letter').value.trim().toUpperCase();
+        
+        // Construct the 3-character ballot code for verification
+        const code = nameStart + costumeStart + favLetter;
+
+        if (!nameStart || !costumeStart || !favLetter) return msg('Please enter all three code components for verification.', 'err');
         if (!validatePicks()) return msg('Choose three different contestants.', 'err');
+
         const body = { code, first: $('#v_first').value, second: $('#v_second').value, third: $('#v_third').value };
+        
         const r = await apiPost('submit_vote', body);
-        if (r.ok) { msg('Vote submitted! Thank you 🎉','ok'); $('#v_code').value=''; ['#v_first','#v_second','#v_third'].forEach(s=>$(s).selectedIndex=0); }
+        
+        if (r.ok) { 
+            msg('Vote submitted! Thank you 🎉','ok'); 
+            $('#v_name_start').value = '';
+            $('#v_costume_start').value = '';
+            $('#v_fav_letter').value = '';
+            ['#v_first','#v_second','#v_third'].forEach(s=>$(s).selectedIndex=0); 
+        }
         else msg(r.error, 'err');
     });
 
