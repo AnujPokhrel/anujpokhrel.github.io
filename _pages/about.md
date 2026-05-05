@@ -16,7 +16,7 @@ selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-Hi! I am a PhD student at George Mason University, [RobotiXX lab](https://people.cs.gmu.edu/~xxiao2/RobotiXX/lab.html) advised by [Dr. Xuesu Xiao](https://cs.gmu.edu/~xiao/). My research focuses on off-road navigation in robotics. I design, build, and deploy robots tailored for challenging off-road environments.
+Hi! I am a PhD candiate at George Mason University, [RobotiXX lab](https://people.cs.gmu.edu/~xxiao2/RobotiXX/lab.html) advised by [Dr. Xuesu Xiao](https://cs.gmu.edu/~xiao/). My research focuses on off-road navigation in robotics. I design, build, and deploy robots tailored for challenging off-road environments.
 
 My work integrates principles from physics, control systems, and planning algorithms to develop robust solutions for off-road robotics. By combining these disciplines, I aim to push the boundaries of what robots can achieve in complex and unpredictable terrains.
 
