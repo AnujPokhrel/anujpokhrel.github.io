@@ -8,7 +8,7 @@ profile:
   align: right 
   image: AnujPic.jpg
   image_circular: false # crops the image to make it circular
-  resume: Anuj_Resume.pdf
+  resume: AnujCV.pdf
   # more_info: Anuj_Resume.pdf
 
 news: true # includes a list of news items
